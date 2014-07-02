@@ -1,0 +1,126 @@
+'use strict';
+
+var
+  util         = require('util'),
+  events       = require('events'),
+  orientations = ['N', 'E', 'S', 'W'],
+  _            = require('underscore')
+;
+
+var MowerService = function MowerService(area, mower) {
+  events.EventEmitter.call(this);
+
+  this.area = area;
+  this.mower = mower;
+
+  return this;
+};
+
+util.inherits(MowerService, events.EventEmitter);
+
+MowerService.prototype.moveNorth = function moveNorth() {
+  var mowerOrdinate = this.mower.getOrdinate();
+
+  if (mowerOrdinate < this.area.getWidth()) {
+    this.mower.setOrdinate(mowerOrdinate + 1);
+  }
+
+  return this;
+};
+
+MowerService.prototype.moveEast = function moveEast() {
+  var mowerAbscissa = this.mower.getAbscissa();
+
+  if (mowerAbscissa < this.area.getLength()) {
+    this.mower.setAbscissa(mowerAbscissa + 1);
+  }
+
+  return this;
+};
+
+MowerService.prototype.moveSouth = function moveSouth() {
+  var mowerOrdinate = this.mower.getOrdinate();
+
+  if (mowerOrdinate > 0) {
+    this.mower.setOrdinate(mowerOrdinate - 1);
+  }
+
+  return this;
+};
+
+MowerService.prototype.moveWest = function moveWest() {
+  var mowerAbscissa = this.mower.getAbscissa();
+
+  if (mowerAbscissa > 0) {
+    this.mower.setAbscissa(mowerAbscissa - 1);
+  }
+
+  return this;
+};
+
+MowerService.prototype.move = function move(steps) {
+  var
+    mowerService = this,
+    errorMessage = 'can not move mower, @params is not defined'
+  ;
+
+  if (!mowerService.area) {
+    return mowerService.emit('error', {message : errorMessage.replace('@params', 'area')});
+  }
+
+  if (!mowerService.mower) {
+    return mowerService.emit('error', {message : errorMessage.replace('@params', 'mower')});
+  }
+
+  if (!steps) {
+    return mowerService.emit('error', {message : errorMessage.replace('@params', 'steps')});
+  }
+
+  var
+    mower            = this.mower,
+    orientationIndex = orientations.indexOf(mower.getOrientation())
+  ;
+
+  _.each(steps, function(step) {
+    switch (step) {
+      case 'A' :
+        switch (mower.getOrientation()) {
+          case 'N' :
+            mowerService.moveNorth();
+            break;
+          case 'E' :
+            mowerService.moveEast();
+            break;
+          case 'S' :
+            mowerService.moveSouth();
+            break;
+          case 'W' :
+            mowerService.moveWest();
+            break;
+          default :
+            break;
+        }
+        break;
+      case 'D' :
+        orientationIndex = (orientations.length + (++orientationIndex)) % orientations.length;
+        mower.setOrientation(orientations[orientationIndex]);
+        break;
+      case 'G' :
+        orientationIndex = (orientations.length + (--orientationIndex)) % orientations.length;
+        mower.setOrientation(orientations[orientationIndex]);
+        break;
+      default :
+        break;
+    }
+  });
+
+  return mowerService.emit('success', this.mower.position);
+};
+
+MowerService.prototype.getOutput = function getOutput() {
+  var output = this.position.x + ' ' + this.position.y + ' ' + this.position.orientation;
+
+  return output;
+};
+
+module.exports = MowerService;

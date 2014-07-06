@@ -6,4 +6,4 @@ echo ""
 echo "Starting mower application..."
 echo ""
 
-node server.js $@
+node application.js $@

@@ -198,19 +198,19 @@ MowerService.prototype.moveMowers = function moveMowers() {
       }
     ;
 
-    if (_.findWhere(mowerService.takenCells, takenCell)) {
-      error.message = 'can not place mower, the cell is already taken';
-      return error;
-    }
+    // if (_.findWhere(mowerService.takenCells, takenCell)) {
+    //   error.message = 'can not place mower, the cell is already taken';
+    //   return error;
+    // }
 
     mowerService.takenCells.push(takenCell);
 
     seriesTasks.push(move(mowerPosition, mowerConfiguration.steps));
   });
 
-  if (error.message) {
-    return mowerService.emit('moveMowers:error');
-  }
+  // if (error.message) {
+  //   return mowerService.emit('moveMowers:error');
+  // }
 
   return async.series(seriesTasks, function seriesCallback(error, mowerPositions) {
     if (error) {

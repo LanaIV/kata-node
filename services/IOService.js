@@ -21,37 +21,61 @@ IOService.prototype.getConfigurationFromInput = function getConfigurationFromInp
   var ioService = this;
 
   if (!ioService.input) {
-    return ioService.emit('error', {message : 'input is undefined'});
+    return ioService.emit('getConfiguration:error', {message : 'input is undefined'});
   }
 
   return fs.readFile(ioService.input, {encoding : 'utf8'},  function(error, content) {
     if (error) {
-      return ioService.emit('error', error);
+      return ioService.emit('getConfiguration:error', error);
     }
 
     var inputArray = _.compact(content.split('\n'));
 
-    if (_.size(inputArray) !== 5) {
-      return ioService.emit('error', {message : 'input is wrong, it should have 5 lignes'});
+    if (_.size(inputArray) % 2 !== 1) {
+      return ioService.emit('getConfiguration:error', {message : 'input is wrong, it should have odd number of lignes'});
     }
 
-    var configuration = {
-      area             : inputArray[0].split(' '),
-      firstMower       : inputArray[1].split(' '),
-      firstMowerSteps  : inputArray[2].split(''),
-      secondMower      : inputArray[3].split(' '),
-      secondMowerSteps : inputArray[4].split('')
-    };
+    var
+      area          = inputArray[0],
+      mowers        = [],
+      mower         = {},
+      configuration = {}
+    ;
 
-    return ioService.emit('success', configuration);
+    if (!/^[0-9]+ [0-9]+$/.test(area)) {
+      return ioService.emit('getConfiguration:error', {message : 'input is wrong, the first line is improperly formated'});
+    }
+
+    configuration.area = area.split(' ');
+
+    inputArray = _.rest(inputArray);
+
+    _.each(inputArray, function(line, index) {
+      if (index % 2 === 0 && /^([1-9]+ ){2}[nesw]$/i.test(line)) {
+        mower = {position : line.split(' ')};
+      } else if (index % 2 === 1 && /^[agd]+$/i.test(line)) {
+        mower.steps = line.split('');
+        mowers.push(mower);
+      } else {
+        error = {message : 'input is wrong, lines is improperly formated'};
+      }
+    });
+
+    if (error) {
+      return ioService.emit('getConfiguration:error', error);
+    }
+
+    configuration.mowers = mowers;
+
+    return ioService.emit('getConfiguration:success', configuration);
   });
 };
 
 IOService.prototype.formatOutput = function formatOutput(mowerPositions) {
   var ioService = this;
 
-  if (_.size(mowerPositions) !== 2) {
-    return ioService.emit('error', {message : 'At least one of mowers is undefined, both should be defined'});
+  if (_.size(mowerPositions) < 1) {
+    return ioService.emit('formatOutput:error', {message : 'At least one of mowers should be defined'});
   }
 
   var outputs = ['Final position of mowers:'];
@@ -60,7 +84,23 @@ IOService.prototype.formatOutput = function formatOutput(mowerPositions) {
     outputs.push(_.values(mowerPosition).join(' '));
   });
 
-  return ioService.emit('success', outputs.join('\n'));
+  return ioService.emit('formatOutput:success', outputs.join('\n'));
+};
+
+IOService.prototype.formatJsonOutput = function formatJsonOutput(mowerPositions) {
+  var ioService = this;
+
+  if (_.size(mowerPositions) < 1) {
+    return ioService.emit('formatJsonOutput:error', {message : 'At least one of mowers should be defined'});
+  }
+
+  var jsonOutput = {mowers : []};
+
+  _.each(mowerPositions, function(mowerPosition) {
+    jsonOutput.mowers.push(mowerPosition);
+  });
+
+  return ioService.emit('formatJsonOutput:success', jsonOutput);
 };
 
 module.exports = IOService;

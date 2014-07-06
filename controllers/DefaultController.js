@@ -1,34 +1,22 @@
 'use strict';
 
-var path = require('path');
-
-process.env.NODE_PATH = [
-  path.join(__dirname),
-  path.join(__dirname, 'lib'),
-  path.join(__dirname, 'etc'),
-  path.join(__dirname, 'models'),
-  path.join(__dirname, 'services'),
-  path.join(__dirname, 'controllers')
-].join(':');
-
-require('module')._initPaths();
-
 var
-  namespace    = 'server',
-  input        = 'input',
-  async        = require('async'),
-  IOService    = require('IOService'),
+  namespace = 'controllers:defaultController',
+  async = require('async'),
+  IOService = require('IOService'),
   MowerService = require('MowerService'),
-  argv         = require('optimist').argv,
-  logger       = require('log4js').getLogger(namespace)
+  logger = require('log4js').getLogger(namespace)
 ;
 
-var start = function start() {
-  if (!argv.o && !argv.output) {
-    return require('server');
-  }
+var DefaultController = function DefaultController() {
+  return this;
+};
 
-  var ioService = new IOService(input);
+DefaultController.prototype.getHandler = function getHandler(req, res) {
+  var
+    input = req.params.input || 'input',
+    ioService = new IOService(input)
+  ;
 
   return async.waterfall([
     function getConfiguration(getConfigurationCallback) {
@@ -55,25 +43,27 @@ var start = function start() {
 
       return mowerService.moveMowers();
     },
-    function formatOutput(mowers, formatOutputCallback) {
-      ioService.once('formatOutput:error', function ioServiceErrorCallback(error) {
-        return formatOutputCallback(error);
+    function formatJsonOutput(mowers, formatJsonOutputCallback) {
+      ioService.once('formatJsonOutput:error', function ioServiceErrorCallback(error) {
+        return formatJsonOutputCallback(error);
       });
 
-      ioService.once('formatOutput:success', function ioServiceErrorCallback(output) {
-        return formatOutputCallback(null, output);
+      ioService.once('formatJsonOutput:success', function ioServiceErrorCallback(output) {
+        return formatJsonOutputCallback(null, output);
       });
 
-      return ioService.formatOutput(mowers);
+      return ioService.formatJsonOutput(mowers);
     }
   ],
   function waterfallCallback(error, output) {
     if (error) {
-      return logger.error(error);
+      logger.error(error.message);
+
+      return res.send(400, error);
     }
 
-    return console.log(output);
+    return res.json(output);
   });
 };
 
-start();
+module.exports = new DefaultController();

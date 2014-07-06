@@ -1,5 +1,5 @@
 module.exports = {
   run : {
-    cmd : './run.sh'
+    cmd : './run.sh --output'
   }
 };

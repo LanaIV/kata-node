@@ -1,7 +1,7 @@
 'use strict';
 
 var Mower = function Mower(position) {
-  if (!position.abscissa || !position.ordinate || !position.orientation) {
+  if (!position || !position.abscissa || !position.ordinate || !position.orientation) {
     return this;
   }
 
@@ -15,33 +15,51 @@ Mower.prototype.getPosition = function getPosition() {
 };
 
 Mower.prototype.setAbscissa = function setAbscissa(abscissa) {
+  if (!this.position) {
+    this.position = {};
+  }
+
   this.position.abscissa = parseInt(abscissa);
 
   return this;
 };
 
 Mower.prototype.getAbscissa = function getAbscissa() {
-  return parseInt(this.position.abscissa);
+  if (this.position) {
+    return parseInt(this.position.abscissa);
+  }
 };
 
 Mower.prototype.setOrdinate = function setOrdinate(ordinate) {
+  if (!this.position) {
+    this.position = {};
+  }
+
   this.position.ordinate = parseInt(ordinate);
 
   return this;
 };
 
 Mower.prototype.getOrdinate = function getOrdinate() {
-  return parseInt(this.position.ordinate);
+  if (this.position) {
+    return parseInt(this.position.ordinate);
+  }
 };
 
 Mower.prototype.setOrientation = function setOrientation(orientation) {
+  if (!this.position) {
+    this.position = {};
+  }
+
   this.position.orientation = orientation;
 
   return this;
 };
 
 Mower.prototype.getOrientation = function getOrientation() {
-  return this.position.orientation;
+  if (this.position) {
+    return this.position.orientation;
+  }
 };
 
 module.exports = Mower;

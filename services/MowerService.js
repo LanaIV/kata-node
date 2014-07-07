@@ -13,6 +13,10 @@ var
 var MowerService = function MowerService(areaConfiguration, mowerConfigurations) {
   events.EventEmitter.call(this);
 
+  if (!areaConfiguration || !mowerConfigurations) {
+    return this;
+  }
+
   var areaSize = _.object(['length', 'width'], areaConfiguration);
 
   this.area = new Area(areaSize);
@@ -103,15 +107,15 @@ MowerService.prototype.moveMower = function moveMower(mower, steps) {
   ;
 
   if (!mowerService.area) {
-    return mowerService.emit('moveMower:error', {message : errorMessage.replace('@params', 'area')});
+    return mowerService.emit('moveMower:error', {error : errorMessage.replace('@params', 'area')});
   }
 
   if (!mower) {
-    return mowerService.emit('moveMower:error', {message : errorMessage.replace('@params', 'mower')});
+    return mowerService.emit('moveMower:error', {error : errorMessage.replace('@params', 'mower')});
   }
 
   if (!steps) {
-    return mowerService.emit('moveMower:error', {message : errorMessage.replace('@params', 'steps')});
+    return mowerService.emit('moveMower:error', {error : errorMessage.replace('@params', 'steps')});
   }
 
   var
@@ -164,18 +168,18 @@ MowerService.prototype.moveMower = function moveMower(mower, steps) {
 
 MowerService.prototype.moveMowers = function moveMowers() {
   var
-    error = {},
-    seriesTasks = [],
+    error        = '',
+    seriesTasks  = [],
     mowerService = this
   ;
+
+  if (!mowerService.area || !mowerService.mowerConfigurations) {
+    return mowerService.emit('moveMowers:error', {error : 'neither area nor the mowerConfigurations is defined'});
+  }
 
   var move = function move(position, steps) {
     return function(callback) {
       var mower = new Mower(position);
-
-      if (mower.getAbscissa() > mowerService.area.getLength() || mower.getOrdinate() > mowerService.area.getWidth()) {
-        return callback({message : 'can not move mower, it is out of area'});
-      }
 
       mowerService.once('moveMower:error', function mowerServiceErrorCallback(mowerServiceError) {
         return callback(mowerServiceError);
@@ -198,19 +202,24 @@ MowerService.prototype.moveMowers = function moveMowers() {
       }
     ;
 
-    // if (_.findWhere(mowerService.takenCells, takenCell)) {
-    //   error.message = 'can not place mower, the cell is already taken';
-    //   return error;
-    // }
+    if (_.findWhere(mowerService.takenCells, takenCell)) {
+      error = 'can not place mower, the cell is already taken';
+      return error;
+    }
+
+    if (takenCell.abscissa > mowerService.area.getLength() || takenCell.ordinate > mowerService.area.getWidth()) {
+      error = 'can not place mower, it is out of area';
+      return error;
+    }
 
     mowerService.takenCells.push(takenCell);
 
     seriesTasks.push(move(mowerPosition, mowerConfiguration.steps));
   });
 
-  // if (error.message) {
-  //   return mowerService.emit('moveMowers:error');
-  // }
+  if (error) {
+    return mowerService.emit('moveMowers:error', {error : error});
+  }
 
   return async.series(seriesTasks, function seriesCallback(error, mowerPositions) {
     if (error) {

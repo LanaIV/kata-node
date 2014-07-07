@@ -28,6 +28,10 @@ var start = function start() {
     return require('server');
   }
 
+  if (argv.i || argv.input) {
+    input = argv.i;
+  }
+
   var ioService = new IOService(input);
 
   return async.waterfall([
@@ -49,13 +53,13 @@ var start = function start() {
         return moveMowersCallback(mowerServiceError);
       });
 
-      mowerService.once('moveMowers:success', function mowerServiceSuccessCallback(mowerPosition) {
-        return moveMowersCallback(null, mowerPosition);
+      mowerService.once('moveMowers:success', function mowerServiceSuccessCallback(mowerPositions) {
+        return moveMowersCallback(null, mowerPositions);
       });
 
       return mowerService.moveMowers();
     },
-    function formatOutput(mowers, formatOutputCallback) {
+    function formatOutput(mowerPositions, formatOutputCallback) {
       ioService.once('formatOutput:error', function ioServiceErrorCallback(error) {
         return formatOutputCallback(error);
       });
@@ -64,7 +68,7 @@ var start = function start() {
         return formatOutputCallback(null, output);
       });
 
-      return ioService.formatOutput(mowers);
+      return ioService.formatOutput(mowerPositions);
     }
   ],
   function waterfallCallback(error, output) {

@@ -11,7 +11,7 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.loadNpmTasks('grunt-exec');
-
   grunt.registerTask('default', 'Run application', ['exec:run']);
+
+  grunt.registerTask('test', 'Run test suite', ['mochaTest:full']);
 };

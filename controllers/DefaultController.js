@@ -1,11 +1,11 @@
 'use strict';
 
 var
-  namespace = 'controllers:defaultController',
-  async = require('async'),
-  IOService = require('IOService'),
+  namespace    = 'controllers:defaultController',
+  async        = require('async'),
+  IOService    = require('IOService'),
   MowerService = require('MowerService'),
-  logger = require('log4js').getLogger(namespace)
+  logger       = require('log4js').getLogger(namespace)
 ;
 
 var DefaultController = function DefaultController() {
@@ -14,7 +14,7 @@ var DefaultController = function DefaultController() {
 
 DefaultController.prototype.getHandler = function getHandler(req, res) {
   var
-    input = req.params.input || 'input',
+    input     = req.query.input || 'input',
     ioService = new IOService(input)
   ;
 
@@ -37,13 +37,14 @@ DefaultController.prototype.getHandler = function getHandler(req, res) {
         return moveMowersCallback(mowerServiceError);
       });
 
-      mowerService.once('moveMowers:success', function mowerServiceSuccessCallback(mowerPosition) {
-        return moveMowersCallback(null, mowerPosition);
+      mowerService.once('moveMowers:success', function mowerServiceSuccessCallback(mowerPositions) {
+        return moveMowersCallback(null, mowerPositions);
       });
 
       return mowerService.moveMowers();
     },
-    function formatJsonOutput(mowers, formatJsonOutputCallback) {
+    function formatJsonOutput(mowerPositions, formatJsonOutputCallback) {
+      logger.error(mowerPositions);
       ioService.once('formatJsonOutput:error', function ioServiceErrorCallback(error) {
         return formatJsonOutputCallback(error);
       });
@@ -52,12 +53,12 @@ DefaultController.prototype.getHandler = function getHandler(req, res) {
         return formatJsonOutputCallback(null, output);
       });
 
-      return ioService.formatJsonOutput(mowers);
+      return ioService.formatJsonOutput(mowerPositions);
     }
   ],
   function waterfallCallback(error, output) {
     if (error) {
-      logger.error(error.message);
+      logger.error(error.error);
 
       return res.send(400, error);
     }

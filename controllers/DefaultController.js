@@ -44,7 +44,6 @@ DefaultController.prototype.getHandler = function getHandler(req, res) {
       return mowerService.moveMowers();
     },
     function formatJsonOutput(mowerPositions, formatJsonOutputCallback) {
-      logger.error(mowerPositions);
       ioService.once('formatJsonOutput:error', function ioServiceErrorCallback(error) {
         return formatJsonOutputCallback(error);
       });

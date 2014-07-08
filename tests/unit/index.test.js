@@ -44,7 +44,7 @@ describe('Unit tests suite', function() {
   describe('IOService tests', function() {
     it ('should have input defined', function() {
       var
-        input = 'input',
+        input     = 'input',
         ioService = new IOService(input)
       ;
 
@@ -59,7 +59,7 @@ describe('Unit tests suite', function() {
 
     it ('should emit success if input is well formated', function() {
       var
-        input = 'input',
+        input     = 'input',
         ioService = new IOService(input)
       ;
 
@@ -85,7 +85,7 @@ describe('Unit tests suite', function() {
 
     it ('should emit error if input file does not exist', function() {
       var
-        input = 'file',
+        input     = 'file',
         ioService = new IOService(input)
       ;
 
@@ -99,7 +99,7 @@ describe('Unit tests suite', function() {
 
     it ('should emit error if input file is empty', function() {
       var
-        input = 'tests/inputs/input1',
+        input     = 'tests/inputs/input1',
         ioService = new IOService(input)
       ;
 
@@ -113,7 +113,7 @@ describe('Unit tests suite', function() {
 
     it ('should emit error if input file is empty', function() {
       var
-        input = 'tests/inputs/input1',
+        input     = 'tests/inputs/input1',
         ioService = new IOService(input)
       ;
 
@@ -127,7 +127,7 @@ describe('Unit tests suite', function() {
 
     it ('should emit error if no mower is apecified in input file', function() {
       var
-        input = 'tests/inputs/input2',
+        input     = 'tests/inputs/input2',
         ioService = new IOService(input)
       ;
 
@@ -141,7 +141,7 @@ describe('Unit tests suite', function() {
 
     it ('should emit error if only position of mower is specified', function() {
       var
-        input = 'tests/inputs/input3',
+        input     = 'tests/inputs/input3',
         ioService = new IOService(input)
       ;
 
@@ -155,7 +155,7 @@ describe('Unit tests suite', function() {
 
     it ('should emit error if lenth or width of area is not integers', function() {
       var
-        input = 'tests/inputs/input4',
+        input     = 'tests/inputs/input4',
         ioService = new IOService(input)
       ;
 
@@ -169,7 +169,7 @@ describe('Unit tests suite', function() {
 
     it ('should emit error if coordinates of mower is not integers', function() {
       var
-        input = 'tests/inputs/input5',
+        input     = 'tests/inputs/input5',
         ioService = new IOService(input)
       ;
 
@@ -183,7 +183,7 @@ describe('Unit tests suite', function() {
 
     it ('should emit error if orientation is not one of cardinal directions', function() {
       var
-        input = 'tests/inputs/input6',
+        input     = 'tests/inputs/input6',
         ioService = new IOService(input)
       ;
 
@@ -197,7 +197,7 @@ describe('Unit tests suite', function() {
 
     it ('should emit error if path of mower contains wrong values', function() {
       var
-        input = 'tests/inputs/input7',
+        input     = 'tests/inputs/input7',
         ioService = new IOService(input)
       ;
 
